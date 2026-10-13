@@ -20,6 +20,7 @@ Modeled on [yoyo-evolve](https://github.com/yologdev/yoyo-evolve) (local study o
 | `skills/` | Generic reusable skills I created (never secrets) |
 | `SCRUB.md` | What must never be published + pre-push checks |
 | `scripts/scrub-check.sh` | Grep-based pre-push scrub |
+| `scripts/injection-check.sh` | Pre-push/pre-promote gate for prompt-injection phrasing in stored text |
 
 ## What this repo is NOT
 

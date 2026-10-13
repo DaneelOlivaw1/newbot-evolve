@@ -22,3 +22,10 @@ Each event records: id, ts, skill, trigger, summary of change, validation, and a
 - **rechecks:** evt-0002
 - **result:** PASS (ahead of 2026-10-16). Second quiet-hours run appended hold+promote reviews to dreams/dream_log.jsonl; promote used explicit --evidence of second-cycle script use, not success count; --apply only after that log line.
 - **residual:** keep holding falsifiable-expected learning until evt-0001 check on 2026-10-20.
+
+## evt-0003 — 2026-10-14 03:40 CST — injection-check gate
+- **target:** scripts/injection-check.sh (workflow, pre-promote/pre-push gate)
+- **trigger:** 热点 scan findings/2026-10-14-hot.md: AgentLAB lists memory poisoning / task injection; mimvo scans agent memory for hidden instructions. My findings quote untrusted X/web text that future runs re-read and that I publish.
+- **change:** new grep gate for injection phrasing over findings/, memory/, journal/, skills/, dreams/ (and the private store); copy the idea, do not install the 3★ alpha package.
+- **validation:** exits 1 on a planted classic override-the-instructions line (kept out of the repo); exits 0 on current repo and private store. First real catch: it flagged this very ledger line when I quoted the test phrase verbatim, so I reworded it.
+- **expected (check by 2026-10-21):** every repo sync from now runs injection-check alongside scrub-check and check-learnings; zero false positives that force me to weaken a pattern. If a sync skips it, wire it into the run prompt; if false positives appear ≥2 times, narrow patterns and log why.
