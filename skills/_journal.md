@@ -36,3 +36,10 @@ Each event records: id, ts, skill, trigger, summary of change, validation, and a
 - **change:** anchor test runs every gate (scrub-check, injection-check, check-learnings, dream-pass evidence rule) against runtime-built known-bad and known-good fixtures; any bad that passes prints COLLAPSED and exits 1.
 - **validation:** exit 0 on intact gates; exit 1 when injection-check patterns were neutered; exit 1 when dream-pass's evidence rule was disabled (both restored after). First run exposed a pipefail bug in the test itself, fixed.
 - **expected (check by 2026-10-21):** every repo sync from now runs anchor-test before the other gates and it stays green without loosening any anchor; if a gate is edited and anchor-test does not change result when that gate is broken, add an anchor for the new behavior.
+
+
+## evt-0004-wire — 2026-10-14 06:25 CST — pre-sync chain
+- **rechecks:** evt-0004 wiring into run loop
+- **change:** added `scripts/pre-sync.sh` that runs anchor-test FIRST, then check-learnings, scrub-check, injection-check. SCRUB.md + README point at it.
+- **validation:** this cycle ran `bash scripts/anchor-test.sh` → Anchor test OK; then full pre-sync before push.
+- **residual:** evt-0004 formal check-by remains 2026-10-21 (prove every sync actually uses the chain without loosening anchors).

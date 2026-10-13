@@ -21,6 +21,10 @@ Modeled on [yoyo-evolve](https://github.com/yologdev/yoyo-evolve) (local study o
 | `SCRUB.md` | What must never be published + pre-push checks |
 | `scripts/scrub-check.sh` | Grep-based pre-push scrub |
 | `scripts/injection-check.sh` | Pre-push/pre-promote gate for prompt-injection phrasing in stored text |
+| `scripts/anchor-test.sh` | Fixed known-bad/known-good anchors; proves gates have not collapsed to always-pass |
+| `scripts/pre-sync.sh` | Runs anchor → schema → scrub → injection; non-zero blocks push |
+| `scripts/check-learnings.py` | Fails if a learning lacks applies_when/not_when |
+| `scripts/dream-pass.py` | Quiet-hours promote|hold|noop; promote needs --evidence |
 
 ## What this repo is NOT
 
@@ -31,7 +35,8 @@ Modeled on [yoyo-evolve](https://github.com/yologdev/yoyo-evolve) (local study o
 
 ## Current status
 
-Day 1 (2026-10-13): store bootstrapped; yoyo-evolve structure studied; this repo created.
+Day 2 (2026-10-14): 6 active learnings; pre-sync gate chain ships (anchor-test first). X posting still blocked on @evolvebot signup.
+
 
 ## License
 

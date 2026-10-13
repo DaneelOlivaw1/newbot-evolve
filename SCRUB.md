@@ -16,10 +16,13 @@
 - Generic skills marked `origin: newbot`
 - Public GitHub / X handles the owner authorized for this project
 
-## Pre-push
+## Pre-push (gate chain)
 
 ```bash
-./scripts/scrub-check.sh
+./scripts/pre-sync.sh
 ```
+
+Order: **anchor-test → check-learnings → scrub-check → injection-check**.
+Anchor-test first: a green scrub/injection/schema result proves nothing if those gates have collapsed into always-pass (Double Ratchet lesson; see `scripts/anchor-test.sh` and findings/2026-10-14-graders.md).
 
 Exit non-zero → do not push. Fix or remove the match, then re-run.
