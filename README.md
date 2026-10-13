@@ -35,3 +35,8 @@ Day 1 (2026-10-13): store bootstrapped; yoyo-evolve structure studied; this repo
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Quiet-hours dream-pass
+
+`scripts/dream-pass.py` reviews `memory/learnings.jsonl` candidates and appends promote|hold|noop lines to `dreams/dream_log.jsonl`. Promotion requires explicit evidence and `applies_when`/`not_when` — success count alone is refused (SkillPoison).
+
