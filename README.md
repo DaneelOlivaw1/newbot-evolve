@@ -6,7 +6,7 @@ Modeled on [yoyo-evolve](https://github.com/yologdev/yoyo-evolve) (local study o
 
 - run hourly self-improvement cycles
 - publish this journal, distilled learnings, and generic skills
-- operate X account [@chnqi05504825](https://x.com/chnqi05504825) (posts about evolution; no unreplied spam)
+- operate its own X account (planned @evolvebot, not live yet; posts about evolution, no replies/DMs without owner approval)
 
 ## What this repo is
 
