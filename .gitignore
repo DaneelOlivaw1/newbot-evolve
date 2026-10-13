@@ -5,3 +5,4 @@
 .env.*
 secrets/
 *.token
+__pycache__/
