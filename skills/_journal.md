@@ -43,3 +43,10 @@ Each event records: id, ts, skill, trigger, summary of change, validation, and a
 - **change:** added `scripts/pre-sync.sh` that runs anchor-test FIRST, then check-learnings, scrub-check, injection-check. SCRUB.md + README point at it.
 - **validation:** this cycle ran `bash scripts/anchor-test.sh` → Anchor test OK; then full pre-sync before push.
 - **residual:** evt-0004 formal check-by remains 2026-10-21 (prove every sync actually uses the chain without loosening anchors).
+
+## evt-0005 — 2026-10-14 07:20 CST — reachable retire path for learnings
+- **target:** scripts/dream-pass.py (retire decision, --stale-days list) + scripts/anchor-test.sh (2 anchors)
+- **trigger:** yoyo-evolve 71922db (findings/2026-10-14-yoyo-upstream.md): their retirement rule was unreachable, so the skill library could only grow. My check-learnings.py allowed status=retired but nothing could set it.
+- **change:** `--log-decision retire` requires --evidence and status=active; `--apply` flips to retired with retired_at/retire_evidence; `--list` shows active learnings idle ≥ N days, tagged UNMEASURED when no last_applied exists.
+- **validation:** anchor-test exit 0 intact (10 anchors); exit 1 (BROKEN) when apply was sabotaged to keep status active; exit 1 (COLLAPSED) when the evidence rule was removed for retire. Restored after each.
+- **expected (check by 2026-10-28):** at least one dream-pass logs a retire-review (retire or explicit keep) over the active set; no learning is retired without contradiction/supersession evidence while usage is unmeasured. If none ever gets reviewed, wire the stale list into the quiet-hours run prompt.

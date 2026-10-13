@@ -62,5 +62,25 @@ dp_accepts() {
 expect 1 "dream-pass refuses promote without --evidence" dp_promote_slips
 expect 0 "dream-pass accepts a hold decision"            dp_accepts
 
+# --- dream-pass retire anchors (yoyo-evolve 71922db: an exit state nothing can reach is dead) ---
+cat > "$T/l_act.jsonl" <<'J'
+{"type":"observation","day":1,"ts":"x","source":"s","title":"old","evidence":"e","status":"active","applies_when":"a","not_when":"b","takeaway":"t","promoted_at":"2020-01-01T00:00Z"}
+J
+dp_retire_refuses() {
+  local out; out="$(python3 "$DIR/dream-pass.py" --log-decision retire --title "old" \
+    --reason "quiet" --learnings "$T/l_act.jsonl" --log "$T/rl.jsonl" 2>&1)"
+  [[ "$out" == *"requires --evidence"* ]]
+}
+dp_retire_slips() { ! dp_retire_refuses; }
+dp_retire_reachable() { # positive control: with evidence, active -> retired must actually happen
+  python3 "$DIR/dream-pass.py" --log-decision retire --title "old" --reason "superseded" \
+    --evidence "anchor fixture" --learnings "$T/l_act.jsonl" --log "$T/rl2.jsonl" >/dev/null 2>&1 &&
+  python3 "$DIR/dream-pass.py" --apply --learnings "$T/l_act.jsonl" --log "$T/rl2.jsonl" \
+    --active "$T/act.md" >/dev/null 2>&1 &&
+  grep -q '"status": "retired"' "$T/l_act.jsonl"
+}
+expect 1 "dream-pass refuses retire without --evidence" dp_retire_slips
+expect 0 "dream-pass retire path is reachable"          dp_retire_reachable
+
 [[ $fail -ne 0 ]] && { echo "Anchor test FAILED: do not trust gates or push until fixed." >&2; exit 1; }
 echo "Anchor test OK: all gates still reject planted bad input."

@@ -5,12 +5,20 @@ Never auto-promotes. Promotion requires an explicit --log promote decision
 that cites evidence beyond success count (SkillPoison / Devin dreaming).
 
 Usage:
-  dream-pass.py --list [--learnings PATH]
+  dream-pass.py --list [--stale-days N] [--learnings PATH]
   dream-pass.py --log DECISION --title TITLE --reason TEXT [--evidence TEXT]
-  dream-pass.py --apply   # flip status to active only for unused promote logs
+  dream-pass.py --apply   # apply unused promote/retire logs
   dream-pass.py --regen   # rebuild active_learnings.md from status=active
 
-DECISION is one of: promote | hold | noop
+DECISION is one of: promote | hold | noop | retire
+
+Retire (yoyo-evolve 71922db lesson, 2026-10-14): schema allowed status=retired
+but nothing could ever set it, so the active set could only grow. retire needs
+--evidence and an active learning; it is reversible (flip status back to
+candidate and re-promote). --list also shows active learnings whose last use
+(last_applied, else promoted_at) is >= --stale-days old as retire-review items.
+Silence only counts when it is measured: a learning with no last_applied field
+is never retired for silence alone; cite a contradiction or supersession.
 """
 from __future__ import annotations
 
@@ -24,7 +32,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_LEARNINGS = ROOT / "memory" / "learnings.jsonl"
 DEFAULT_LOG = ROOT / "dreams" / "dream_log.jsonl"
 DEFAULT_ACTIVE = ROOT / "memory" / "active_learnings.md"
-DECISIONS = {"promote", "hold", "noop"}
+DECISIONS = {"promote", "hold", "noop", "retire"}
 
 
 def load_learnings(path: pathlib.Path) -> list[dict]:
@@ -56,7 +64,19 @@ def append_jsonl(path: pathlib.Path, obj: dict) -> None:
         f.write(json.dumps(obj, ensure_ascii=False) + "\n")
 
 
-def cmd_list(learnings: pathlib.Path) -> int:
+def _age_days(ts: str | None) -> float | None:
+    if not ts:
+        return None
+    for fmt in ("%Y-%m-%dT%H:%MZ", "%Y-%m-%dT%H:%M:%SZ"):
+        try:
+            t = datetime.strptime(ts, fmt).replace(tzinfo=timezone.utc)
+            return (datetime.now(timezone.utc) - t).total_seconds() / 86400
+        except ValueError:
+            continue
+    return None
+
+
+def cmd_list(learnings: pathlib.Path, stale_days: float = 30) -> int:
     rows = load_learnings(learnings)
     cands = [r for r in rows if r.get("status") == "candidate"]
     print(f"{len(cands)} candidate(s) of {len(rows)} total\n")
@@ -67,6 +87,18 @@ def cmd_list(learnings: pathlib.Path) -> int:
         print(f"    not_when={r.get('not_when')}")
         print(f"    takeaway={r.get('takeaway')}")
         print()
+    stale = []
+    for r in rows:
+        if r.get("status") != "active":
+            continue
+        measured = bool(r.get("last_applied"))
+        age = _age_days(r.get("last_applied") or r.get("promoted_at"))
+        if age is not None and age >= stale_days:
+            stale.append((age, measured, r))
+    print(f"{len(stale)} active learning(s) idle >= {stale_days:g} days (retire-review)")
+    for age, measured, r in sorted(stale, key=lambda x: -x[0]):
+        tag = "measured" if measured else "UNMEASURED: do not retire for silence"
+        print(f"[{r['_line']}] {r.get('title')}  ({age:.0f}d, {tag})")
     return 0
 
 
@@ -74,8 +106,8 @@ def cmd_log(args: argparse.Namespace) -> int:
     if args.decision not in DECISIONS:
         print(f"decision must be one of {sorted(DECISIONS)}", file=sys.stderr)
         return 2
-    if args.decision == "promote" and not (args.evidence or "").strip():
-        print("promote requires --evidence (not success count alone)", file=sys.stderr)
+    if args.decision in ("promote", "retire") and not (args.evidence or "").strip():
+        print(f"{args.decision} requires --evidence (not success count or silence alone)", file=sys.stderr)
         return 2
     rows = load_learnings(args.learnings)
     match = next((r for r in rows if r.get("title") == args.title), None)
@@ -90,6 +122,9 @@ def cmd_log(args: argparse.Namespace) -> int:
         if match.get("status") != "candidate":
             print(f"cannot promote: status is {match.get('status')}", file=sys.stderr)
             return 1
+    if args.decision == "retire" and match.get("status") != "active":
+        print(f"cannot retire: status is {match.get('status')}", file=sys.stderr)
+        return 1
     entry = {
         "type": "review",
         "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
@@ -110,6 +145,16 @@ def cmd_apply(args: argparse.Namespace) -> int:
     log = load_log(args.log)
     changed = 0
     for entry in log:
+        if entry.get("decision") == "retire" and not entry.get("applied"):
+            r = by_title.get(entry.get("title"))
+            if r is not None and r.get("status") == "active" and entry.get("evidence"):
+                r["status"] = "retired"
+                r["retired_at"] = entry.get("ts")
+                r["retire_evidence"] = entry.get("evidence")
+                entry["applied"] = True
+                changed += 1
+                print(f"retired: {entry.get('title')}")
+            continue
         if entry.get("decision") != "promote" or entry.get("applied"):
             continue
         title = entry.get("title")
@@ -145,7 +190,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
         for entry in log:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     regen_active(args.learnings, args.active)
-    print(f"apply done; {changed} promoted")
+    print(f"apply done; {changed} changed")
     return 0
 
 
@@ -185,9 +230,10 @@ def main() -> int:
     p.add_argument("--title")
     p.add_argument("--reason", default="")
     p.add_argument("--evidence", default="")
+    p.add_argument("--stale-days", type=float, default=30)
     args = p.parse_args()
     if args.list:
-        return cmd_list(args.learnings)
+        return cmd_list(args.learnings, args.stale_days)
     if args.decision:
         if not args.title or not args.reason:
             print("--log-decision needs --title and --reason", file=sys.stderr)
