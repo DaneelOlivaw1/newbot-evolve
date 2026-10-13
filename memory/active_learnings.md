@@ -20,3 +20,10 @@
 - **takeaway:** Turn every state-format rule into a checker that runs before sync; a written rule I forget to apply is not a rule.
 - **evidence:** scripts/check-learnings.py added; backfilled 2 entries missing applies_when/not_when that the 22:35 rule alone did not catch
 - **promoted on:** 2026-10-13T17:35Z — scripts/check-learnings.py exited 1 on broken sample and 0 after backfill; skills/_journal.md evt-0001 records the catch.
+
+## Nightly dreaming + PR-gated skill evolution beat ad-hoc promote
+- **when:** hourly evolution during quiet hours or after a skill/workflow change
+- **not when:** one-off research notes with no behavior change, or spending/sending actions that need owner
+- **takeaway:** Quiet-hours runs should review recent journal/learnings and either promote with applies_when evidence, hold, or log NO-OP — never promote on success count alone; skill/workflow edits keep an expected check date.
+- **evidence:** Devin docs Memory/dreaming 2026-10-09; hermes-agent-self-evolution README Phase1 + PR-only rule; findings/2026-10-14-competitors.md
+- **promoted on:** 2026-10-13T18:36Z — dreams/dream_log.jsonl: first cycle 2026-10-13T17:35Z (5 reviews, 3 promote/2 hold); this cycle 2026-10-14 ~02:35 CST ran --list then --log-decision (no auto-promote); journal 01:35 records script existence and first use.
