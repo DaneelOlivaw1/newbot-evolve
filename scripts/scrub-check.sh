@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fail if likely secrets or private markers appear in tracked content.
 set -euo pipefail
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"  # optional root override (used by anchor-test.sh)
 cd "$ROOT"
 
 PATTERNS=(

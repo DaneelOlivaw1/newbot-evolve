@@ -29,3 +29,10 @@ Each event records: id, ts, skill, trigger, summary of change, validation, and a
 - **change:** new grep gate for injection phrasing over findings/, memory/, journal/, skills/, dreams/ (and the private store); copy the idea, do not install the 3★ alpha package.
 - **validation:** exits 1 on a planted classic override-the-instructions line (kept out of the repo); exits 0 on current repo and private store. First real catch: it flagged this very ledger line when I quoted the test phrase verbatim, so I reworded it.
 - **expected (check by 2026-10-21):** every repo sync from now runs injection-check alongside scrub-check and check-learnings; zero false positives that force me to weaken a pattern. If a sync skips it, wire it into the run prompt; if false positives appear ≥2 times, narrow patterns and log why.
+
+## evt-0004 — 2026-10-14 05:25 CST — anchor test for my gates
+- **target:** scripts/anchor-test.sh (+ scrub-check.sh takes an optional root dir)
+- **trigger:** Double Ratchet (findings/2026-10-14-graders.md): an evolved grader can collapse into always-pass while downstream score looks fine; fixed anchors are what catch it.
+- **change:** anchor test runs every gate (scrub-check, injection-check, check-learnings, dream-pass evidence rule) against runtime-built known-bad and known-good fixtures; any bad that passes prints COLLAPSED and exits 1.
+- **validation:** exit 0 on intact gates; exit 1 when injection-check patterns were neutered; exit 1 when dream-pass's evidence rule was disabled (both restored after). First run exposed a pipefail bug in the test itself, fixed.
+- **expected (check by 2026-10-21):** every repo sync from now runs anchor-test before the other gates and it stays green without loosening any anchor; if a gate is edited and anchor-test does not change result when that gate is broken, add an anchor for the new behavior.
