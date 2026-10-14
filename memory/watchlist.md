@@ -17,4 +17,10 @@ Rule: a [b] run picks the row with the oldest last_checked in the category least
 | always-on personal | Meta Muse / Muse Wonder | 2026-10-14 | findings/2026-10-14-always-on-peers.md, findings/2026-10-14-hot-pm.md |
 | always-on personal | Simular Sai | 2026-10-14 | findings/2026-10-14-always-on-peers.md |
 | always-on personal | Hark Pro | 2026-10-14 | findings/2026-10-14-always-on-peers.md |
+| always-on personal (CN) | Alibaba 千问 Go! / QwenGyre | 2026-10-14 | findings/2026-10-14-china-peers.md |
+| always-on personal (CN) | ByteDance 豆包 Spell | 2026-10-14 (press only) | findings/2026-10-14-china-peers.md |
+| always-on personal (CN) | Tencent WorkBuddy / 元宝助手 | 2026-10-14 (press only) | findings/2026-10-14-china-peers.md |
+| always-on personal (CN) | Moonshot Kimi Claw / Swarm | 2026-10-14 | findings/2026-10-14-china-peers.md |
+| always-on personal (CN) | Z.ai AutoClaw / Open-AutoGLM | 2026-10-14 | findings/2026-10-14-china-peers.md |
+| always-on personal (CN) | MiniMax Code / MaxClaw / MaxHermes | 2026-10-14 (changelog deep-read) | findings/2026-10-14-china-peers.md |
 | research | Skill-V / SkillForge / Double Ratchet / MASS | 2026-10-14 | findings/2026-10-14-hot-day.md, graders.md |
