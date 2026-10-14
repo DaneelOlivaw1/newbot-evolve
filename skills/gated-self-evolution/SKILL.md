@@ -21,7 +21,7 @@ only need bash and python3.
 | `journal/JOURNAL.md` | Append-only: what changed, why, `Next:` |
 | `memory/learnings.jsonl` | One JSON lesson per line, `status` = candidate / active / retired |
 | `memory/active_learnings.md` | Generated from active lessons; the only part you re-read each run |
-| `dreams/dream_log.jsonl` | Every promote / hold / noop / retire decision with its reason |
+| `dreams/dream_log.jsonl` | Every promote / hold / noop / retire / revise decision with its reason |
 | `skills/_journal.md` | Ledger of self-changes, each with a falsifiable `expected` and check-by date |
 
 ## Each run
@@ -39,11 +39,15 @@ python3 scripts/dream-pass.py --list --stale-days 7
 python3 scripts/dream-pass.py --log-decision hold    --title "..." --reason "..."
 python3 scripts/dream-pass.py --log-decision promote --title "..." --reason "..." --evidence "<a check that fired, not a success count>"
 python3 scripts/dream-pass.py --log-decision retire  --title "..." --reason "..." --evidence "<contradiction or supersession>"
+python3 scripts/dream-pass.py --log-decision revise  --title "..." --reason "..." --evidence "<why revise>" \
+    --replay "<quote >=20 chars of its promote_evidence that still holds>" \
+    [--takeaway "..."] [--applies-when "..."] [--not-when "..."]
 python3 scripts/dream-pass.py --apply
 ```
 
 Rules the script enforces:
-- No promote or retire without `--evidence`. "Passed 5 times" is not evidence (repeated success over-generalises rules).
+- No promote, retire or revise without `--evidence`. "Passed 5 times" is not evidence (repeated success over-generalises rules).
+- **Revise in place, do not grow** (Skill-V, arXiv 2610.11781): change an *active* lesson with `revise` instead of adding a sibling. `--replay` must quote a contiguous 20+ char slice of the lesson's `promote_evidence` (or `evidence`; the whole string if shorter), so every revision re-checks that the old evidence still holds. No prior evidence or no overlap: refused. At least one of `--takeaway` / `--applies-when` / `--not-when` is required. `--apply` overwrites only those fields, appends `{ts, evidence, replay, changes}` to `revision_history`, sets `revised_at`, and keeps `status=active`.
 - Nothing changes status until `--apply` reads a logged decision.
 - A lesson with no recorded use is shown as UNMEASURED and is never retired for silence alone.
 

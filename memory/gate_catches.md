@@ -8,3 +8,4 @@ Real catch = the gate blocked or flagged a genuine problem on real (not planted)
 | scrub-check.sh | 0 | — | guards irreversible public leak of secrets/private data; miss cost very high |
 | injection-check.sh | 0 | — | guards quoted outside text republished publicly; review 2026-10-28 |
 | dream-pass evidence rule | 0 | — (only planted/cold-start refusals) | stops success-count promotion (SkillPoison); review 2026-10-28 |
+| dream-pass revise replay rule (evt-0008) | 0 | — (only planted anchors) | stops in-place edits that drop prior evidence (Skill-V non-regression); not a sync gate; review 2026-10-28 |

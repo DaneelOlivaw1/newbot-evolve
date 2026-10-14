@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""Quiet-hours dream-pass: review candidate learnings, log promote|hold|noop.
+"""Quiet-hours dream-pass: review candidate learnings, log promote|hold|noop|retire|revise.
 
 Never auto-promotes. Promotion requires an explicit --log promote decision
 that cites evidence beyond success count (SkillPoison / Devin dreaming).
 
 Usage:
   dream-pass.py --list [--stale-days N] [--learnings PATH]
-  dream-pass.py --log DECISION --title TITLE --reason TEXT [--evidence TEXT]
-  dream-pass.py --apply   # apply unused promote/retire logs
+  dream-pass.py --log-decision DECISION --title TITLE --reason TEXT [--evidence TEXT]
+  dream-pass.py --log-decision revise --title TITLE --reason TEXT --evidence TEXT \
+      --replay TEXT [--takeaway T] [--applies-when A] [--not-when N]
+  dream-pass.py --apply   # apply unused promote/retire/revise logs
   dream-pass.py --regen   # rebuild active_learnings.md from status=active
 
-DECISION is one of: promote | hold | noop | retire
+DECISION is one of: promote | hold | noop | retire | revise
 
 Retire (yoyo-evolve 71922db lesson, 2026-10-14): schema allowed status=retired
 but nothing could ever set it, so the active set could only grow. retire needs
@@ -19,6 +21,16 @@ candidate and re-promote). --list also shows active learnings whose last use
 (last_applied, else promoted_at) is >= --stale-days old as retire-review items.
 Silence only counts when it is measured: a learning with no last_applied field
 is never retired for silence alone; cite a contradiction or supersession.
+
+Revise (Skill-V arXiv 2610.11781 non-regression, 2026-10-14): change an ACTIVE
+learning in place instead of adding a sibling. Needs --evidence (why revise),
+at least one of --takeaway/--applies-when/--not-when, and --replay: text that
+re-affirms the prior evidence still holds. Mechanically --replay must contain a
+contiguous >=20-char slice of the learning's promote_evidence (else evidence),
+or the whole prior string if it is shorter than 20 chars. No prior evidence to
+replay -> refused. --apply overwrites only the given fields, appends
+{ts, evidence, replay, changes} to revision_history, sets revised_at, keeps
+status=active.
 """
 from __future__ import annotations
 
@@ -32,7 +44,22 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_LEARNINGS = ROOT / "memory" / "learnings.jsonl"
 DEFAULT_LOG = ROOT / "dreams" / "dream_log.jsonl"
 DEFAULT_ACTIVE = ROOT / "memory" / "active_learnings.md"
-DECISIONS = {"promote", "hold", "noop", "retire"}
+DECISIONS = {"promote", "hold", "noop", "retire", "revise"}
+REVISE_FIELDS = ("takeaway", "applies_when", "not_when")
+REPLAY_MIN = 20
+
+
+def prior_evidence(r: dict) -> str:
+    return str(r.get("promote_evidence") or r.get("evidence") or "").strip()
+
+
+def replay_ok(prior: str, replay: str) -> bool:
+    """Skill-V non-regression: replay must quote the prior evidence it reaffirms."""
+    if not prior or not replay:
+        return False
+    if len(prior) < REPLAY_MIN:
+        return prior in replay
+    return any(prior[i:i + REPLAY_MIN] in replay for i in range(len(prior) - REPLAY_MIN + 1))
 
 
 def load_learnings(path: pathlib.Path) -> list[dict]:
@@ -106,7 +133,7 @@ def cmd_log(args: argparse.Namespace) -> int:
     if args.decision not in DECISIONS:
         print(f"decision must be one of {sorted(DECISIONS)}", file=sys.stderr)
         return 2
-    if args.decision in ("promote", "retire") and not (args.evidence or "").strip():
+    if args.decision in ("promote", "retire", "revise") and not (args.evidence or "").strip():
         print(f"{args.decision} requires --evidence (not success count or silence alone)", file=sys.stderr)
         return 2
     rows = load_learnings(args.learnings)
@@ -125,6 +152,31 @@ def cmd_log(args: argparse.Namespace) -> int:
     if args.decision == "retire" and match.get("status") != "active":
         print(f"cannot retire: status is {match.get('status')}", file=sys.stderr)
         return 1
+    new_fields = {}
+    if args.decision == "revise":
+        replay = (args.replay or "").strip()
+        if not replay:
+            print("revise requires --replay (re-affirm the prior evidence still holds)", file=sys.stderr)
+            return 2
+        if match.get("status") != "active":
+            print(f"cannot revise: status is {match.get('status')}", file=sys.stderr)
+            return 1
+        prior = prior_evidence(match)
+        if not prior:
+            print("cannot revise: no prior evidence to replay", file=sys.stderr)
+            return 1
+        if not replay_ok(prior, replay):
+            print(f"cannot revise: --replay does not overlap prior evidence "
+                  f"(need a {REPLAY_MIN}+ char slice of it)", file=sys.stderr)
+            return 1
+        for k in REVISE_FIELDS:
+            v = (getattr(args, k) or "").strip()
+            if v:
+                new_fields[k] = v
+        if not new_fields:
+            print("cannot revise: nothing to revise (give --takeaway/--applies-when/--not-when)",
+                  file=sys.stderr)
+            return 2
     entry = {
         "type": "review",
         "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
@@ -134,6 +186,9 @@ def cmd_log(args: argparse.Namespace) -> int:
         "evidence": (args.evidence or "").strip() or None,
         "applied": False,
     }
+    if args.decision == "revise":
+        entry["replay"] = args.replay.strip()
+        entry.update(new_fields)
     append_jsonl(args.log, entry)
     print(f"logged {args.decision}: {args.title}")
     return 0
@@ -154,6 +209,26 @@ def cmd_apply(args: argparse.Namespace) -> int:
                 entry["applied"] = True
                 changed += 1
                 print(f"retired: {entry.get('title')}")
+            continue
+        if entry.get("decision") == "revise" and not entry.get("applied"):
+            r = by_title.get(entry.get("title"))
+            fields = {k: entry[k] for k in REVISE_FIELDS if str(entry.get(k) or "").strip()}
+            if (r is None or r.get("status") != "active" or not entry.get("evidence")
+                    or not fields or not replay_ok(prior_evidence(r), entry.get("replay") or "")):
+                print(f"skip revise (not active / no evidence / replay mismatch): {entry.get('title')}")
+                continue
+            changes = {k: {"from": r.get(k), "to": v} for k, v in fields.items() if r.get(k) != v}
+            r.update(fields)
+            r.setdefault("revision_history", []).append({
+                "ts": entry.get("ts"),
+                "evidence": entry.get("evidence"),
+                "replay": entry.get("replay"),
+                "changes": changes,
+            })
+            r["revised_at"] = entry.get("ts")
+            entry["applied"] = True
+            changed += 1
+            print(f"revised: {entry.get('title')} ({', '.join(fields)})")
             continue
         if entry.get("decision") != "promote" or entry.get("applied"):
             continue
@@ -212,6 +287,9 @@ def regen_active(learnings: pathlib.Path, active: pathlib.Path) -> None:
             lines.append(f"- **evidence:** {r.get('evidence')}")
             if r.get("promote_evidence"):
                 lines.append(f"- **promoted on:** {r.get('promoted_at')} — {r.get('promote_evidence')}")
+            if r.get("revised_at"):
+                n = len(r.get("revision_history") or [])
+                lines.append(f"- **revised:** {r.get('revised_at')} ({n} revision(s), prior evidence replayed)")
             lines.append("")
     active.write_text("\n".join(lines))
     print(f"wrote {active} ({len(rows)} active)")
@@ -230,6 +308,10 @@ def main() -> int:
     p.add_argument("--title")
     p.add_argument("--reason", default="")
     p.add_argument("--evidence", default="")
+    p.add_argument("--replay", default="", help="revise: quote of prior evidence that still holds")
+    p.add_argument("--takeaway", default="")
+    p.add_argument("--applies-when", dest="applies_when", default="")
+    p.add_argument("--not-when", dest="not_when", default="")
     p.add_argument("--stale-days", type=float, default=30)
     args = p.parse_args()
     if args.list:

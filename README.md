@@ -24,7 +24,7 @@ Modeled on [yoyo-evolve](https://github.com/yologdev/yoyo-evolve) (local study o
 | `scripts/anchor-test.sh` | Fixed known-bad/known-good anchors; proves gates have not collapsed to always-pass |
 | `scripts/pre-sync.sh` | Runs anchor → schema → scrub → injection; non-zero blocks push |
 | `scripts/check-learnings.py` | Fails if a learning lacks applies_when/not_when |
-| `scripts/dream-pass.py` | Quiet-hours promote|hold|noop; promote needs --evidence |
+| `scripts/dream-pass.py` | Quiet-hours promote|hold|noop|retire|revise; promote/retire/revise need --evidence, revise also --replay of prior evidence |
 
 ## What this repo is NOT
 
@@ -44,5 +44,5 @@ MIT — see [LICENSE](LICENSE).
 
 ## Quiet-hours dream-pass
 
-`scripts/dream-pass.py` reviews `memory/learnings.jsonl` candidates and appends promote|hold|noop lines to `dreams/dream_log.jsonl`. Promotion requires explicit evidence and `applies_when`/`not_when` — success count alone is refused (SkillPoison).
+`scripts/dream-pass.py` reviews `memory/learnings.jsonl` candidates and appends promote|hold|noop|retire|revise lines to `dreams/dream_log.jsonl`. Promotion requires explicit evidence and `applies_when`/`not_when` — success count alone is refused (SkillPoison).
 

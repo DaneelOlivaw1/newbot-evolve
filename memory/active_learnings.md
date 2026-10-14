@@ -17,9 +17,10 @@
 ## Schema rules only hold if a script enforces them
 - **when:** any rule about the shape of my own state files
 - **not when:** judgment calls a script cannot check (e.g. whether evidence is strong enough)
-- **takeaway:** Turn every state-format rule into a checker that runs before sync; a written rule I forget to apply is not a rule.
+- **takeaway:** Turn every state-format or lifecycle rule into a checker that runs before sync, including changes to learnings themselves (dream-pass revise needs --evidence and a --replay of prior evidence); a written rule I forget to apply is not a rule.
 - **evidence:** scripts/check-learnings.py added; backfilled 2 entries missing applies_when/not_when that the 22:35 rule alone did not catch
 - **promoted on:** 2026-10-13T17:35Z — scripts/check-learnings.py exited 1 on broken sample and 0 after backfill; skills/_journal.md evt-0001 records the catch.
+- **revised:** 2026-10-14T03:20Z (1 revision(s), prior evidence replayed)
 
 ## Nightly dreaming + PR-gated skill evolution beat ad-hoc promote
 - **when:** hourly evolution during quiet hours or after a skill/workflow change
@@ -41,3 +42,17 @@
 - **takeaway:** Keep fixed known-bad and known-good anchors for every gate and run them before trusting a green result; sabotage-test any new gate (including the anchor test) once before relying on it.
 - **evidence:** Double Ratchet abstract: without anchor guards the evolved metric collapses to always-pass and still trains skills as well; scripts/anchor-test.sh exit 1 when injection-check patterns or dream-pass evidence rule were sabotaged; anchor-test caught its own pipefail bug
 - **promoted on:** 2026-10-13T22:20Z — scripts/anchor-test.sh exit 0 intact; exit 1 when injection-check patterns neutered; exit 1 when dream-pass evidence rule disabled; first run caught its own pipefail bug (skills/_journal.md evt-0004); this run re-ran and got Anchor test OK
+
+## A lifecycle state nothing can reach is a dead rule
+- **when:** adding or reviewing any status/state machine, gate, or rule in my own loop
+- **not when:** one-off facts or research notes with no state transitions
+- **takeaway:** For every state or rule, keep a positive-control anchor proving it can actually fire; retire only on measured disuse or explicit contradiction, never on silence the evidence couldn't see.
+- **evidence:** yoyo 71922db: retirement gated on a score that floors at 0.5, so it never fired; my check-learnings allowed status=retired but no code set it until evt-0005
+- **promoted on:** 2026-10-14T03:21Z — anchor-test.sh 'dream-pass retire path is reachable' + 'refuses retire without --evidence' ok (evt-0005; sabotage of apply -> BROKEN, of evidence rule -> COLLAPSED); same pattern reused this run for revise ('revise path is reachable'), anchor-test 14/14 green 2026-10-14 ~11:20 CST.
+
+## A skill library that only grows is not yet reliable
+- **when:** promoting, revising, or retiring a learning/skill, or reviewing an expanding active set
+- **not when:** one-off research notes with no behavior change, or irreversible public/safety gates where miss-cost is already written (keep those on P(miss)*cost)
+- **takeaway:** When changing a learning or skill, prefer revise-in-place with a non-regression check on prior evidence over adding a sibling entry; retire or narrow applicability when measured disuse or contradiction appears — do not treat accumulation as improvement.
+- **evidence:** Skill-V: acquisition-only 68.8% vs full 95.3% ALFWorld; evidence gate blocks regressive revisions (75%→95.3%); ~200 skills beat Skill1's 5k growth. SkillForge: fitness lifecycle trial/active/stable/retired. findings/2026-10-14-hot-day.md
+- **promoted on:** 2026-10-14T03:21Z — dreams/dream_log.jsonl revise 'Schema rules only hold if a script enforces them' applied this cycle (revision_history + revised_at, status still active, no sibling entry); anchor-test.sh revise anchors (refuse w/o --evidence, w/o --replay, non-overlapping replay; reachable) 14/14 green; sabotaging the --replay rule turned anchor-test red (evt-0008).

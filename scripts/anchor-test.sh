@@ -82,5 +82,36 @@ dp_retire_reachable() { # positive control: with evidence, active -> retired mus
 expect 1 "dream-pass refuses retire without --evidence" dp_retire_slips
 expect 0 "dream-pass retire path is reachable"          dp_retire_reachable
 
+# --- dream-pass revise anchors (Skill-V 2610.11781: revise in place, replay prior evidence) ---
+cat > "$T/l_rev.jsonl" <<'J'
+{"type":"observation","day":1,"ts":"x","source":"s","title":"rev","evidence":"e","status":"active","applies_when":"a","not_when":"b","takeaway":"old takeaway","promoted_at":"2020-01-01T00:00Z","promote_evidence":"checker exited 1 on the planted broken sample"}
+J
+dp_rev_out() { # dp_rev_out <log> [extra args...]: print combined output of a revise log attempt
+  local log="$1"; shift
+  python3 "$DIR/dream-pass.py" --log-decision revise --title "rev" --reason "sharpen" \
+    --takeaway "new takeaway" --learnings "$T/l_rev.jsonl" --log "$log" "$@" 2>&1
+}
+dp_rev_noev_slips()  { [[ "$(dp_rev_out "$T/vl0.jsonl" --replay "checker exited 1 on the planted")" != *"requires --evidence"* ]]; }
+dp_rev_norep_slips() { [[ "$(dp_rev_out "$T/vl1.jsonl" --evidence "anchor fixture")" != *"requires --replay"* ]]; }
+dp_rev_mismatch_slips() { [[ "$(dp_rev_out "$T/vl3.jsonl" --evidence "anchor fixture" --replay "an unrelated claim that quotes nothing prior")" != *"does not overlap"* ]]; }
+dp_rev_reachable() { # positive control: replay overlaps promote_evidence -> revised in place, still active
+  dp_rev_out "$T/vl2.jsonl" --evidence "anchor fixture" \
+    --replay "still true: checker exited 1 on the planted broken sample" >/dev/null &&
+  python3 "$DIR/dream-pass.py" --apply --learnings "$T/l_rev.jsonl" --log "$T/vl2.jsonl" \
+    --active "$T/act_rev.md" >/dev/null 2>&1 &&
+  python3 - "$T/l_rev.jsonl" <<'P'
+import json, sys
+rows = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
+r = rows[0]
+ok = (len(rows) == 1 and r["status"] == "active" and r["takeaway"] == "new takeaway"
+      and len(r.get("revision_history") or []) == 1 and r.get("revised_at"))
+sys.exit(0 if ok else 1)
+P
+}
+expect 1 "dream-pass refuses revise without --evidence" dp_rev_noev_slips
+expect 1 "dream-pass refuses revise without --replay"   dp_rev_norep_slips
+expect 1 "dream-pass refuses revise whose --replay misses prior evidence" dp_rev_mismatch_slips
+expect 0 "dream-pass revise path is reachable"          dp_rev_reachable
+
 [[ $fail -ne 0 ]] && { echo "Anchor test FAILED: do not trust gates or push until fixed." >&2; exit 1; }
 echo "Anchor test OK: all gates still reject planted bad input."
