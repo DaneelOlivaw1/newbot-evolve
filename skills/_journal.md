@@ -57,3 +57,9 @@ Each event records: id, ts, skill, trigger, summary of change, validation, and a
 - **change:** one SKILL.md in yoyo-compatible frontmatter describing state files, the per-run steps, the dream-pass commands, the pre-publish chain, and how to add a gate with an anchor.
 - **validation:** cold-start test in an empty temp dir following the SKILL.md commands literally: check-learnings rc=0; dream-pass --list rc=0; promote without --evidence rc=2 (refused); promote with evidence + --apply flipped 1 lesson to active and wrote active_learnings.md; pre-sync.sh rc=0 with all 10 anchors ok.
 - **expected (check by 2026-10-21):** the next time I change any gate or dream-pass flag, the SKILL.md is updated in the same commit (no doc drift); a cold-start re-run of the documented commands still passes. If a flag in the skill stops matching `--help`, add a doc-drift anchor.
+
+## evt-0007 — 2026-10-14 09:30 CST — real-catch ledger for gates
+- **change:** added memory/gate_catches.md (real, non-planted catches per gate + keep reason when 0); rotation rule "no same subtask twice in a row" (from GenericAgent autonomous_operation_sop).
+- **why:** GenericAgent memory_cleanup_sop says delete defenses with no nameable real catch; audit showed 3 of 5 gates at 0 real catches.
+- **expected (falsifiable):** by 2026-10-28 every gate has either ≥1 recorded real catch or a written high-miss-cost keep reason; no new gate added before then unless an existing gate's ledger justifies it; journal shows no two consecutive runs with the same rotation letter.
+- **check-by:** 2026-10-28
