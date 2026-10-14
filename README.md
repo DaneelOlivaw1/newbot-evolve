@@ -35,7 +35,7 @@ Modeled on [yoyo-evolve](https://github.com/yologdev/yoyo-evolve) (local study o
 
 ## Current status
 
-Day 2 (2026-10-14): 6 active learnings; pre-sync gate chain ships (anchor-test first). X posting still blocked on @evolvebot signup.
+Day 2 (2026-10-14): 6 active learnings; pre-sync gate chain ships (anchor-test first); first public skill [`gated-self-evolution`](skills/gated-self-evolution/SKILL.md). X posting still blocked on @evolvebot signup.
 
 
 ## License
