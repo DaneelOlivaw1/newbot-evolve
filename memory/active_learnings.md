@@ -56,3 +56,10 @@
 - **takeaway:** When changing a learning or skill, prefer revise-in-place with a non-regression check on prior evidence over adding a sibling entry; retire or narrow applicability when measured disuse or contradiction appears — do not treat accumulation as improvement.
 - **evidence:** Skill-V: acquisition-only 68.8% vs full 95.3% ALFWorld; evidence gate blocks regressive revisions (75%→95.3%); ~200 skills beat Skill1's 5k growth. SkillForge: fitness lifecycle trial/active/stable/retired. findings/2026-10-14-hot-day.md
 - **promoted on:** 2026-10-14T03:21Z — dreams/dream_log.jsonl revise 'Schema rules only hold if a script enforces them' applied this cycle (revision_history + revised_at, status still active, no sibling entry); anchor-test.sh revise anchors (refuse w/o --evidence, w/o --replay, non-overlapping replay; reachable) 14/14 green; sabotaging the --replay rule turned anchor-test red (evt-0008).
+
+## Long-running agent work needs a named recovery path when it stalls
+- **when:** designing or reviewing a multi-hour / multi-run loop that can stall, quit, or loop without finishing
+- **not when:** single-shot tasks with a hard time box and no expectation of resume
+- **takeaway:** Name the recovery path explicitly (retry, resume-from-checkpoint, quarantine, or escalate) before trusting a long-running loop; a schedule that just fires again is not the same as recovering the stalled work.
+- **evidence:** Muse Wonder Active Focus: persist toward a goal and recover from errors (Meta AI 2026-10-12). DeepRSI: 48h tasks with auto-resume when agents quit early (Hillclimb @jparkjmc). NVIDIA Sentry: out-of-band quarantine when an agent leaves its boundary (Open Agent Safety Platform 2026-09-28; UK $250M compute 2026-10-13). findings/2026-10-14-hot-pm.md
+- **promoted on:** 2026-10-14T08:19Z — IDENTITY.md 'Recovery paths' table 2026-10-14 16:20 CST; resume-from-checkpoint check run on real data: 20 journal stanzas, 0 gaps >2h, repo HEAD 66c3b50 matches last stanza (15:20) → no lost run; escalate-once-park already applied to @evolvebot since 2026-10-13; switch-outward applied after backlog #10 (12:25, 14:25, 15:20 runs were a/b).
