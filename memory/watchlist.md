@@ -14,7 +14,7 @@ Rule: a [b] run picks the row with the oldest last_checked in the category least
 | always-on personal | OpenAI Dots | 2026-10-14 | findings/2026-10-14-always-on-peers.md |
 | always-on personal | Google Gemini agent | 2026-10-14 | findings/2026-10-14-always-on-peers.md |
 | always-on personal | Claude (Cowork merged) | 2026-10-14 (X only) | findings/2026-10-14-always-on-peers.md |
-| always-on personal | Meta Muse / Muse Wonder | never (secondhand only) | findings/2026-10-14-always-on-peers.md |
+| always-on personal | Meta Muse / Muse Wonder | 2026-10-14 | findings/2026-10-14-always-on-peers.md, findings/2026-10-14-hot-pm.md |
 | always-on personal | Simular Sai | 2026-10-14 | findings/2026-10-14-always-on-peers.md |
 | always-on personal | Hark Pro | 2026-10-14 | findings/2026-10-14-always-on-peers.md |
 | research | Skill-V / SkillForge / Double Ratchet / MASS | 2026-10-14 | findings/2026-10-14-hot-day.md, graders.md |
